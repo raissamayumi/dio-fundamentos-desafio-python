@@ -3,8 +3,6 @@ menu1 = """
 [1] Logar
 [2] Criar Nova Usuario
 [3] Criar Nova Conta
-[4] Listar Usuários
-[5] Listar Contas
 [0] Sair
 
 => """
@@ -19,11 +17,11 @@ menu2 = """
 => """
 
 
-def criar_conta_usuario(usuarios):
-    cpf = input("Informa o CPF ")
+def criar_usuario(usuarios):
+    cpf =str(input("Informa o CPF "))
 
-    existe = [True for usuario in usuarios if usuario["cpf"] == cpf]
-    if existe == True:
+    usuario_existe = verificar_usuario(cpf, usuarios)
+    if usuario_existe:
         print("Usuário já cadastrado")
         return 
     
@@ -32,21 +30,27 @@ def criar_conta_usuario(usuarios):
     print("Usuário cadastrado com sucesso")
     return usuarios
 
-def criar_conta_corrente(usuarios, contas):
+def criar_conta_corrente(usuarios, contas, numero_conta):
     usuario_cpf = input("Informa o CPF ")
-    existe = [True for usuario in usuarios if usuario["cpf"] == usuario_cpf]
-    if existe == False:
+
+    usuario_existe = verificar_usuario(usuario_cpf, usuarios)
+    if usuario_existe is None:
         print("Usuário não encontrado")
         return 
-
-    numero_conta = len(contas)+1
 
     contas.append({"numero_conta": numero_conta, "usuario_cpf": usuario_cpf})
     print(f"Conta de número: {numero_conta} cadastrada com sucesso")
     return contas
 
-def verificar_se_conta_existe(contas, numero_conta):
-    return [True for conta in contas if conta["numero_conta"] == numero_conta]
+
+def verificar_se_conta_existe(numero_conta, contas):
+    conta_filtrado = [conta for conta in contas if conta["numero_conta"] == numero_conta]
+    return conta_filtrado[0] if conta_filtrado else None
+
+def verificar_usuario(cpf, usuarios):
+    usuario_filtrado = [usuario for usuario in usuarios if usuario["cpf"] == cpf]
+    return usuario_filtrado[0] if usuario_filtrado else None
+
 
 def depositar(saldo, valor, extrato):   
     if valor > 0:
@@ -92,18 +96,18 @@ saldo = 0
 limite = 500
 extrato = ""
 numero_saques = 0
-usuario = []
+usuarios = []
 contas = []
+numero_conta = 1
 LIMITE_SAQUES = 3
 while True:
 
     opcao1 = input(menu1)
 
     if opcao1 == "1":
-        numero_conta = input("Informe a conta: ")
-        valor = verificar_se_conta_existe(contas, numero_conta)
-        if valor == True:
-
+        numero= input("Informe a conta: ")
+        con = verificar_se_conta_existe(numero, contas)
+        if con:
             opcao = input(menu2)
 
             if opcao == "1":
@@ -122,15 +126,15 @@ while True:
 
             else:
                 print("Operação inválida.")
-
         else:
             print("Conta não encontrada.")
 
     if opcao1 == "2":
-        usuarios = criar_conta_usuario(usuario)
+        usuarios = criar_usuario(usuarios)
 
     elif opcao1 == "3":
-        contas = criar_conta_corrente(usuario, contas)
+        contas = criar_conta_corrente(usuarios, contas, numero_conta)
+        numero_conta = numero_conta +1
 
     elif opcao1 == "0":
      break
